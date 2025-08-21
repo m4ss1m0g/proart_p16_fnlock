@@ -2,6 +2,7 @@
 name: .NET Core Console
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
