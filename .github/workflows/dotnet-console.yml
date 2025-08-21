@@ -2,10 +2,21 @@
 name: .NET Core Console
 
 on:
-  workflow_dispatch:
+  
+  
   push:
     tags:
       - 'v*'
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag for release (es. v1.0.0)"
+        required: true
+
+        
+permissions:
+  contents: write 
 
 jobs:
 
@@ -38,25 +49,24 @@ jobs:
     - name: Build Self-Contained
       run: dotnet build src/FnEsc/FnEsc.csproj --self-contained -c Release -r linux-x64 -o out/self-contained
 
-    - name: 'Upload self-contained Artifact'
-      uses: actions/upload-artifact@v4
-      with:
-          name: fnesc_selfcontained
-          path: out/self-contained
-
-    - name: 'Upload Artifact'
-      uses: actions/upload-artifact@v4
-      with:
-          name: fnesc
-          path: out/net8.0
-    
-    # Zip output
+   
+    # Zip for release
     - name: Zip artifacts
       run: |
-          zip -r fnesc_net8.zip out/net8.0
-          zip -r fnesc_self.zip out/self-contained
+          zip -r fnesc_linux-x64.zip out/net8.0
+          zip -r fnesc_selfcontained_linux-x64 out/self-contained
 
-    # crea la release e allega i file zip
+    # Calculate the tag for the release 
+    - name: Resolve release tag
+      id: vars
+      run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+    # Create release and add zips
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
