@@ -70,13 +70,25 @@ jobs:
 
     # Build the app 
     - name: Build 
-      run: dotnet build src/FnEsc/FnEsc.csproj -c Release -r linux-x64 
+      run: dotnet build src/FnEsc/FnEsc.csproj -c Release -r linux-x64 -o out/net8.0
 
     # Build the app self-contained
     - name: Build Self-Contained
-      run: dotnet build src/FnEsc/FnEsc.csproj --self-contained -c Release -r linux-x64 -o src/FnEsc/bin/Release/self-contained/net8.0/
+      run: dotnet build src/FnEsc/FnEsc.csproj --self-contained -c Release -r linux-x64 -o out/self-contained
 
-    # Zip the self-contained
-    - uses: montudor/action-zip@v1
+    - name: 'Upload self-contained Artifact'
+      uses: actions/upload-artifact@v4
       with:
-         args: zip -qq -r fnesc_selfcontained.zip src/FnEsc/bin/Release/self-contained/net8.0/
+          name: fnesc_selfcontained
+          path: out/self-contained
+
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v4
+      with:
+          name: fnesc
+          path: out/net8.0
+    
+    # Zip the self-contained
+    #- uses: montudor/action-zip@v1
+    #  with:
+    #     args: zip -qq -r fnesc_selfcontained.zip src/FnEsc/bin/Release/self-contained/net8.0/
