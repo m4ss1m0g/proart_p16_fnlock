@@ -1,0 +1,68 @@
+
+name: .NET Core Console
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    runs-on: ubuntu-latest  # For a list of available runner types, refer to
+                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # Build the app 
+    - name: Build 
+      run: dotnet build src/FnEsc/FnEsc.csproj -c Release -r linux-x64 -o out/net8.0
+
+    # Build the app self-contained
+    - name: Build Self-Contained
+      run: dotnet build src/FnEsc/FnEsc.csproj --self-contained -c Release -r linux-x64 -o out/self-contained
+
+    - name: 'Upload self-contained Artifact'
+      uses: actions/upload-artifact@v4
+      with:
+          name: fnesc_selfcontained
+          path: out/self-contained
+
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v4
+      with:
+          name: fnesc
+          path: out/net8.0
+    
+    # Zip output
+    - name: Zip artifacts
+      run: |
+          zip -r fnesc_net8.zip out/net8.0
+          zip -r fnesc_self.zip out/self-contained
+
+    # crea la release e allega i file zip
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        generate_release_notes: true      
+        files: |
+          fnesc_selfcontained_linux-x64.zip
+          fnesc_linux-x64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
