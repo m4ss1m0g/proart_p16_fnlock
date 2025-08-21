@@ -39,6 +39,7 @@
 name: .NET Core Console
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
   pull_request:
@@ -78,4 +79,4 @@ jobs:
     # Zip the self-contained
     - uses: montudor/action-zip@v1
       with:
-         args: zip -qq -r fnesc_selfcontained.zip src/FnEsc/bin/Release/self-contained/net8.0/linux-x64
+         args: zip -qq -r fnesc_selfcontained.zip src/FnEsc/bin/Release/self-contained/net8.0/
