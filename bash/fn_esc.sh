@@ -15,7 +15,7 @@ else
    fi
 fi
 
-sudo "$PGM" "$STATE" > X"$OUTPUT_PGM"
+sudo "$PGM" "$STATE" > "$OUTPUT_PGM"
 echo "$STATE" > "$STATE_FILE"
 
 #notify-send --expire-time=1000 --category=presence "FnEsc" "Status $STATE"
